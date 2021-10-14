@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+  <environments default="">
+    <environment id="">
+      <transactionManager type="JDBC"/>
+      <dataSource type="JNDI">
+      	<!--                                  서버환경에      jdbc/oracle친구가 관리한다! -->
+        <property name="data_source" value="java:comp/env/jdbc/oracle"/>
+      </dataSource>
+    </environment>
+  </environments>
+  <mappers>
+    <mapper resource="mybatis/mapper/loc.xml"/>
+    <mapper resource="mybatis/mapper/country.xml"/>
+  </mappers>
+</configuration>
