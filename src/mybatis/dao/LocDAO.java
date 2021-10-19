@@ -75,17 +75,19 @@ public class LocDAO {
 		return cnt;
 			
 	}
-	public static LocVO[] getList(int begin, int end) {
+	public static LocVO[] getList(String begin, String end,String searchType, String searchValue) {
 		LocVO[] ar = null;
 		
 		// DB 연결준비!!
 		SqlSession ss = FactoryService.getFactory().openSession();
 		
 		// 필요한 맵구조 생성!!
-		Map<String, Integer> map = new HashMap<String, Integer>();
+		Map<String, String> map = new HashMap<String, String>();
 		
 		map.put("begin",begin);
 		map.put("end",end);
+		map.put("searchType", searchType);
+		map.put("searchValue", searchValue);
 		
 		// 모든 정보를 DB와 연결하여 목록을 가져오자!
 		List<LocVO> list = ss.selectList("loc.getList",map);

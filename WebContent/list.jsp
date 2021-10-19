@@ -3,6 +3,7 @@
 <%@page import="mybatis.vo.LocVO"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -36,6 +37,29 @@
 		table tfoot ol.paging li {
 	    float:left;
 	    margin-right:8px;
+	}
+	.s{
+	    padding:3px 7px;
+	    border:1px solid silver;
+	    color: blue;
+	}
+	.s a{
+		text-decoration: none;
+		color: blue;
+	}
+	.now{
+		border:1px solid silver;
+		padding:3px 7px;
+	    color: blue;
+
+	}
+	.move{
+		padding:3px 7px;
+		
+	}
+	.move a{
+		color: black;
+		text-decoration: none;
 	}
 </style>
 
@@ -76,48 +100,46 @@
 					</tr>
 				</thead>
 				<tbody>
-					<%
+					<%-- <%
 				// 첫작업 : VO -- Mapper -- Config -- Factory -- DAO -- Action -- JSP
 				// 그 이후부터는 : VO -- Mapper -- DAO -- ACtion -- JSP
 					// 컨트롤러에서 forward로 이동되어 왔을 것으므로
 					// request에 저장된 정보들 중 "ar"이라는 이름으로
 					// 저장된 정보를 얻어낸다.
 					String cPage = request.getParameter("cPage");
-					Object obj = request.getAttribute("ar3");
+					Object obj = request.getAttribute("ar");
 					Object obj2 = request.getAttribute("pvo");
 					
 					//System.out.println(obj);
 					LocVO[] ar = null;
 					if(obj != null){
 						ar = (LocVO[])obj;
-					
+						session.setAttribute("ar", ar);
 						for(LocVO vo : ar){
-					%>
-						<tr>
-							<td><%=vo.getLocation_id()%></td>
-							<td><%=vo.getStreet_address()%></td>
-							<td>
-							<%if(vo.getPostal_code() != null){ %>
-							<%=vo.getPostal_code()%>
-							<%}%>
-							</td>
-							<td><%=vo.getCity()%></td>
-							<td>
-							<%if(vo.getState_province() != null){ %>
-							<%=vo.getState_province()%>
-							<%}%>
-							</td>
-							<td><%=vo.getCountry_id()%></td>
-						</tr>
-					<%
+					%> --%>
+						<c:forEach var="vo" items="${ar}">
+					<tr>
+						<td>${vo.location_id }</td>
+						<td>${vo.street_address}</td>
+						<td>${vo.postal_code }</td>
+						<td>${vo.city }</td>
+						<td>
+						<c:if test="${vo.state_province ne null}">
+							${vo.state_province }
+						</c:if>
+						</td>
+						<td>${vo.country_id }</td>
+					</tr>
+				</c:forEach>
+					<%-- <%
 						}// for문의 끝
 					}//if문의 끝
-					%>
+					%> --%>
 					<tfoot>
 					<tr>
 						<td colspan="6">
 							<ol class="paging">
-<%
+<%-- <%
 				Paging pvo = null;
 				if(obj2 != null){
 					pvo = (Paging)obj2;
@@ -125,36 +147,43 @@
 					if(pvo.getStartPage() < pvo.getPagePerBlock()){
 						
 				
-%>
+%> --%>
+				<c:if test="${pvo.startPage < pvo.pagePerBlock}">
 								<li class="disable">&lt;</li> <!-- 페이지 이전 버튼 비 활성화 -->
-<%
-}else{	
-%>
-								<li><a href="Controller?type=list&cPage=<%=pvo.getStartPage() - pvo.getPagePerBlock()%>">&lt;</a></li> <!-- 페이지 이전 버튼 활성화 -->
-<%} 
-				for(int i=pvo.getStartPage(); i<=pvo.getEndPage(); i++){
-					if(pvo.getNowPage() == i){
-%>
-								<li class="now"><%=i%></li>
-<%
-	}else{
 
-%>
-								<li><a href="Controller?type=list&cPage=<%=i%>"><%=i%></a></li>
-<%
-	}
-}// 반복문의 끝
+				</c:if>
+				<c:if test="${pvo.startPage > pvo.pagePerBlock}">	
+
+				<li class="s"><a href="Controller?type=list&cPage=${pvo.startPage - pvo.pagePerBlock}">&lt;</a></li> <!-- 페이지 이전 버튼 활성화 -->
+				</c:if>
+
+
+				<c:forEach begin="${pvo.startPage}" end="${pvo.endPage}" varStatus="st">
+					<c:if test="${pvo.nowPage eq st.index}">
+					
+								<li class="now">${st.index}</li>
+
+					</c:if>
+				<c:if test="${pvo.nowPage ne st.index }">
+
+
+								<li class="move"><a href="Controller?type=list&cPage=${st.index }">${st.index}</a></li>
+
+				</c:if>
+	
+           		 </c:forEach>
 				
-				if(pvo.getEndPage() < pvo.getTotalPage()){
-%>
-				<li><a href="Controller?type=list&cPage=<%=pvo.getStartPage() + pvo.getPagePerBlock()%>">&gt;</a></li>
-<%
-				}else{
-%>	
+				
+				<c:if test="${pvo.endPage < pvo.totalPage }">
+				<li class="s"><a href="Controller?type=list&cPage=${pvo.startPage + pvo.pagePerBlock}">&gt;</a></li>
+
+				</c:if>
+				<c:if test="${pvo.endPage >= pvo.totalPage }">
+	
 				<li class="disable">&gt;</li> <!-- 페이지 다음 버튼  활성화 -->
-<%
-				}
-%>
+
+				</c:if>
+
 							</ol>
 						</td>
 					</tr>
@@ -179,18 +208,9 @@
 				<input type="text" id="s_state" name="state_province"/><br/>
 				<label for="s_country">국적코드:</label>
 				<select id="s_country" name="country_id">
-				<%
-					Object ob = request.getAttribute("ar2");
-					if(ob != null){
-						CntVO[] ar2 = (CntVO[])ob;
-						for(CntVO cvo : ar2){
-					
-				%>
-					<option value="<%=cvo.getCountry_id()%>"><%=cvo.getCountry_id()%></option>
-				<%
-						}
-					}
-				%>
+				<c:forEach var="cvo" items="${ar2 }">
+				<option value="${cvo.country_id}">${cvo.country_id}</option>
+				</c:forEach>
 				</select><br/>
 				<input type="button" value="저장" onclick="send(this.form)">
 				<input type="hidden" name="type" value="add"/>
@@ -211,11 +231,11 @@
 				</select>
 				<input type="text" id="searchValue" name="searchValue"/><br/>
 				<input type="button" value="검색" onclick="search(this.form)">
-				<input type="hidden" name="type" value="list"/>
+				<input type="hidden" name="type" value="search"/>
 				</form>
 		</div>
 	</div>
-	<%} %>
+
 	<script>
 	$(function(){
 		$( "#s_hdate" ).datepicker({
@@ -266,12 +286,10 @@
 				dataType: "json", // json표기 법을 위해 jsp페이지를 하나 만들어 거기서 표현을 했다.
 				}).done(function(data){
 					// data안에 chk라는 변수의 값이 1이면 성공
+						alert(data.msg);
 					if(data.chk == 1){
-						alert("저장 완료");
 						location.href="Controller";
 					}
-					else
-						alert("뭔가 잘못 되었다!")
 				}).fail(function(err){
 					console.log(err);
 				});
